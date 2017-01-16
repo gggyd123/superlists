@@ -32,18 +32,25 @@ class NewVisitorTest(unittest.TestCase):
 		#他按回车键页面更新了
 		#代办事项的表格中显示了"1：购买孔雀羽毛"
 		inputbox.send_keys(Keys.ENTER)
-		
+		import time
+		time.sleep(3)
 		table = self.browser.find_element_by_id('id_list_table')
 		rows = table.find_elements_by_tag_name('tr')
-		self.assertTrue(
-			any(row.text == '1:Buy peacoke feathers' for row in rows),
-			"New to-do item did not appear in table"
-		)
+		self.assertIn('1:Buy peacoke feathers',[row.text for row in rows])
 		
 		#页面中又显示了一个文本框，可以输入其他代办事项
 		#他输入了使用孔雀羽毛做鱼漂
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('Use peacoke feathers to make a fly')
+		inputbox.send_keys(Keys.ENTER)
 		
+		import time
+		time.sleep(3)
 		#页面再次更新，他的清单中显示了两个代办事项
+		table = self.browser.find_element_by_id('id_list_table')
+		rows = table.find_elements_by_tag_name('tr')
+		self.assertIn('1:Buy peacoke feathers',[row.text for row in rows])
+		self.assertIn('2:Use peacoke feathers to make a fly',[row.text for row in rows])
 		
 		#王庆想知道网站是否会记住这个代办清单
 		
