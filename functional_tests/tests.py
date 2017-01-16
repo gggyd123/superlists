@@ -1,8 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
+from django.test import LiveServerTestCase
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
 
 	def setUp(self):
 		self.browser=webdriver.Firefox()
@@ -10,11 +10,16 @@ class NewVisitorTest(unittest.TestCase):
 
 	def tearDown(self):
 		self.browser.quit()
-
+	
+	def check_for_row_in_list_table(self,row_text):
+		table = self.browser.find_element_by_id('id_list_table')
+		rows = table.find_elements_by_tag_name('tr')
+		self.assertIn(row_text,[row.text for row in rows])
+	
 	def test_can_start_a_list_and_retrieve_it_later(self):
 		#王庆听说有个很好用的在线代办应用
 		#看了一下这个应用的首页
-		self.browser.get('http://localhost:8000')
+		self.browser.get(self.live_server_url)
 		#他注意到网页的标题和头部都有"To-Do"这个词
 		self.assertIn('To-Do',self.browser.title)
 		header_text = self.browser.find_element_by_tag_name('h1').text
@@ -34,10 +39,8 @@ class NewVisitorTest(unittest.TestCase):
 		inputbox.send_keys(Keys.ENTER)
 		import time
 		time.sleep(3)
-		table = self.browser.find_element_by_id('id_list_table')
-		rows = table.find_elements_by_tag_name('tr')
-		self.assertIn('1:Buy peacoke feathers',[row.text for row in rows])
-		
+		self.check_for_row_in_list_table('1:Buy peacoke feathers')		
+			
 		#页面中又显示了一个文本框，可以输入其他代办事项
 		#他输入了使用孔雀羽毛做鱼漂
 		inputbox = self.browser.find_element_by_id('id_new_item')
@@ -47,10 +50,8 @@ class NewVisitorTest(unittest.TestCase):
 		import time
 		time.sleep(3)
 		#页面再次更新，他的清单中显示了两个代办事项
-		table = self.browser.find_element_by_id('id_list_table')
-		rows = table.find_elements_by_tag_name('tr')
-		self.assertIn('1:Buy peacoke feathers',[row.text for row in rows])
-		self.assertIn('2:Use peacoke feathers to make a fly',[row.text for row in rows])
+		self.check_for_row_in_list_table('1:Buy peacoke feathers')		
+		self.check_for_row_in_list_table('2:Use peacoke feathers to make a fly')
 		
 		#王庆想知道网站是否会记住这个代办清单
 		
@@ -62,6 +63,3 @@ class NewVisitorTest(unittest.TestCase):
 		#很满意，睡觉去了
 		
 		self.fail('Finish the test!')
-
-if __name__=='__main__':
-	unittest.main()
