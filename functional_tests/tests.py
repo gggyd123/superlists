@@ -37,8 +37,10 @@ class NewVisitorTest(LiveServerTestCase):
 		#他按回车键页面更新了
 		#代办事项的表格中显示了"1：购买孔雀羽毛"
 		inputbox.send_keys(Keys.ENTER)
+		edith_list_url = self.browser.current_url
 		import time
 		time.sleep(3)
+		self.assertRegex(edith_list_url,'/lists/.+')
 		self.check_for_row_in_list_table('1:Buy peacoke feathers')		
 			
 		#页面中又显示了一个文本框，可以输入其他代办事项
@@ -53,13 +55,35 @@ class NewVisitorTest(LiveServerTestCase):
 		self.check_for_row_in_list_table('1:Buy peacoke feathers')		
 		self.check_for_row_in_list_table('2:Use peacoke feathers to make a fly')
 		
-		#王庆想知道网站是否会记住这个代办清单
+		#现在有个叫天天的新用户访问网站
 		
-		#他看到网站为他生成了一个唯一的URL
-		#而且有一些文字解说这个功能
+		#我们使用一个新的浏览器会话
+		#确保王庆的信息不会从cookie中泄露出来
+		self.browser.quit()
+		self.browser = webdriver.Firefox()
 		
-		#他访问这个URL发现这个他的代办还在
+		#天天访问首页
+		#页面中看不到王庆的清单
+		self.browser.get(self.live_server_url)
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('Buy peacoke feathers',page_text)
+		self.assertNotIn('make a fly',page_text)
+
+		#天天输入一个新的代办事项，新建一个清单
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('Buy milk')
+		inputbox.send_keys(Keys.ENTER)
 		
+		#天天获得了一个唯一的URL
+		tt_list_url = self.browser.current_url
+		self.assertRegex(tt_list_url,'/lists/.+')
+		self.assertNotEqual(tt_list_url,edith_list_url)
+
+		#这个页面还是没有王庆的清单
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('Buy peacoke feathers',page_text)
+		self.assertIn('Buy milk',page_text)
+
 		#很满意，睡觉去了
 		
 		self.fail('Finish the test!')
