@@ -37,9 +37,9 @@ class NewVisitorTest(LiveServerTestCase):
 		#他按回车键页面更新了
 		#代办事项的表格中显示了"1：购买孔雀羽毛"
 		inputbox.send_keys(Keys.ENTER)
-		edith_list_url = self.browser.current_url
 		import time
 		time.sleep(3)
+		edith_list_url = self.browser.current_url
 		self.assertRegex(edith_list_url,'/lists/.+')
 		self.check_for_row_in_list_table('1:Buy peacoke feathers')		
 			
@@ -73,7 +73,8 @@ class NewVisitorTest(LiveServerTestCase):
 		inputbox = self.browser.find_element_by_id('id_new_item')
 		inputbox.send_keys('Buy milk')
 		inputbox.send_keys(Keys.ENTER)
-		
+		import time
+		time.sleep(3)
 		#天天获得了一个唯一的URL
 		tt_list_url = self.browser.current_url
 		self.assertRegex(tt_list_url,'/lists/.+')
